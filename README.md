@@ -41,11 +41,12 @@ Sistema bancario que expone una API REST (Spring Boot) consumida por una SPA (An
 
 | Tecnología        | Versión | Uso                                 |
 | ----------------- | ------- | ----------------------------------- |
-| Java              | 17      | Lenguaje principal                  |
+| Java              | 21      | Lenguaje principal                  |
 | Spring Boot       | 3.2.4   | Framework web y DI                  |
 | Spring Data JPA   | 3.2.4   | Acceso a datos ORM                  |
+| Maven             | 3.9.6   | Gestión de dependencias y build     |
 | PostgreSQL Driver | —       | Conector base de datos              |
-| iText 7           | 7.x     | Generación de reportes PDF          |
+| iText 7           | 7.2.5   | Generación de reportes PDF          |
 | Lombok            | 1.18.38 | Reducción de boilerplate            |
 | JUnit 5 + Mockito | —       | Testing unitario e integración      |
 | H2                | —       | Base de datos en memoria para tests |
@@ -55,19 +56,21 @@ Sistema bancario que expone una API REST (Spring Boot) consumida por una SPA (An
 | Tecnología      | Versión | Uso                          |
 | --------------- | ------- | ---------------------------- |
 | Angular         | 21.0.0  | Framework SPA                |
-| TypeScript      | 5.9     | Lenguaje principal           |
+| TypeScript      | ~5.9.0  | Lenguaje principal           |
 | Angular Signals | —       | Gestión de estado reactivo   |
-| RxJS            | 7.8.0   | Programación reactiva / HTTP |
-| Jest            | 30.0.0  | Testing unitario             |
+| RxJS            | ~7.8.0  | Programación reactiva / HTTP |
+| zone.js         | ~0.15.0 | Detección de cambios Angular |
+| Jest            | ^30.0.0 | Testing unitario             |
+| Node.js         | 20      | Runtime para build (Docker)  |
 
 ### Infraestructura
 
-| Tecnología     | Uso                            |
-| -------------- | ------------------------------ |
-| Docker         | Contenedores de cada servicio  |
-| Docker Compose | Orquestación multi-servicio    |
-| Nginx          | Servidor estático para Angular |
-| PostgreSQL 16  | Base de datos relacional       |
+| Tecnología      | Versión       | Uso                            |
+| --------------- | ------------- | ------------------------------ |
+| Docker Compose  | 3.9           | Orquestación multi-servicio    |
+| PostgreSQL      | 16-alpine     | Base de datos relacional       |
+| Nginx           | 1.25-alpine   | Servidor estático para Angular |
+| Eclipse Temurin | 21-jre-alpine | Runtime JRE en contenedor      |
 
 ---
 
