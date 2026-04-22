@@ -1,0 +1,5 @@
+<nav class="sidebar">
+  @for (item of nav; track item.path) {
+    <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>
+  }
+</nav>

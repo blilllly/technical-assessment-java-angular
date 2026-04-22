@@ -1,0 +1,114 @@
+<div class="page-title">Movimientos</div>
+
+<div class="toolbar">
+  <input
+    class="search-input"
+    type="text"
+    placeholder="Buscar"
+    [value]="busqueda()"
+    (input)="onBusqueda($event)"
+  />
+  <button class="btn-nuevo" (click)="abrirNuevo()">Nuevo</button>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Fecha</th>
+        <th>Cuenta</th>
+        <th>Tipo</th>
+        <th>Valor</th>
+        <th>Saldo Resultante</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (loading()) {
+        <tr class="empty-row"><td colspan="7">Cargando...</td></tr>
+      } @else if (filtrados().length === 0) {
+        <tr class="empty-row"><td colspan="7">No se encontraron movimientos.</td></tr>
+      } @else {
+        @for (m of filtrados(); track m.id) {
+          <tr>
+            <td>{{ m.id }}</td>
+            <td>{{ m.fecha }}</td>
+            <td>{{ m.numeroCuenta }}</td>
+            <td>{{ m.tipoMovimiento }}</td>
+            <td class="monto" [class.negativo]="esDebito(m.valor)" [class.positivo]="!esDebito(m.valor)">
+              {{ m.valor | number:'1.2-2' }}
+            </td>
+            <td class="monto">$ {{ m.saldo | number:'1.2-2' }}</td>
+            <td>
+              <button class="btn-edit" (click)="abrirEditar(m)">Editar</button>
+              <button class="btn-delete" (click)="eliminar(m)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (showModal()) {
+  <div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editando() ? 'Editar Movimiento' : 'Nuevo Movimiento' }}</h3>
+        <button class="modal-close" (click)="showModal.set(false)">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Cuenta *</label>
+        <select [(ngModel)]="form.cuentaId" [class.error]="errors.cuentaId">
+          <option [value]="0">Seleccionar cuenta</option>
+          @for (c of cuentas(); track c.id) {
+            <option [value]="c.id">{{ c.numeroCuenta }} — {{ c.tipoCuenta }} ({{ c.clienteNombre }})</option>
+          }
+        </select>
+        @if (errors.cuentaId) { <span class="error-msg">{{ errors.cuentaId }}</span> }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select [(ngModel)]="form.tipoMovimiento" [class.error]="errors.tipoMovimiento">
+            <option value="">Seleccionar</option>
+            @for (t of tiposMovimiento; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+          @if (errors.tipoMovimiento) { <span class="error-msg">{{ errors.tipoMovimiento }}</span> }
+        </div>
+        <div class="form-group">
+          <label>Valor *</label>
+          <input type="number" [(ngModel)]="form.valor" [class.error]="errors.valor" min="0.01" step="0.01" />
+          @if (errors.valor) { <span class="error-msg">{{ errors.valor }}</span> }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Fecha (opcional)</label>
+        <input type="date" [(ngModel)]="form.fecha" />
+      </div>
+
+      @if (form.tipoMovimiento === 'Retiro') {
+        <div class="info-box">
+          Límite diario de retiro: <strong>$1,000</strong>. El saldo debe ser suficiente.
+        </div>
+      }
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showModal.set(false)">Cancelar</button>
+        <button class="btn-save" (click)="guardar()">{{ editando() ? 'Actualizar' : 'Registrar' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast()) {
+  <div class="toast" [class.success]="toast()!.tipo === 'success'" [class.error]="toast()!.tipo === 'error'">
+    {{ toast()!.msg }}
+  </div>
+}

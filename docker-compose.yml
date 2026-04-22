@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: devsu-db
+    environment:
+      POSTGRES_DB: devsubank
+      POSTGRES_USER: devsu
+      POSTGRES_PASSWORD: devsu123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./BaseDatos.sql:/docker-entrypoint-initdb.d/BaseDatos.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devsu -d devsubank"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - devsu-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: devsu-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/devsubank
+      SPRING_DATASOURCE_USERNAME: devsu
+      SPRING_DATASOURCE_PASSWORD: devsu123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - devsu-net
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: devsu-frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    networks:
+      - devsu-net
+
+volumes:
+  postgres_data:
+
+networks:
+  devsu-net:
+    driver: bridge

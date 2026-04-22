@@ -1,0 +1,100 @@
+<div class="page-title">Reportes</div>
+
+<div class="filtros-panel">
+  <div class="filtros-row">
+    <div class="form-group">
+      <label>Fecha Inicio *</label>
+      <input type="date" [(ngModel)]="filtros.fechaInicio" [class.error]="errors.fechaInicio" />
+      @if (errors.fechaInicio) { <span class="error-msg">{{ errors.fechaInicio }}</span> }
+    </div>
+    <div class="form-group">
+      <label>Fecha Fin *</label>
+      <input type="date" [(ngModel)]="filtros.fechaFin" [class.error]="errors.fechaFin" />
+      @if (errors.fechaFin) { <span class="error-msg">{{ errors.fechaFin }}</span> }
+    </div>
+    <div class="form-group">
+      <label>Cliente *</label>
+      <select [(ngModel)]="filtros.clienteId" [class.error]="errors.clienteId">
+        <option [value]="0">Seleccionar cliente</option>
+        @for (c of clientes(); track c.clienteId) {
+          <option [value]="c.clienteId">{{ c.nombre }}</option>
+        }
+      </select>
+      @if (errors.clienteId) { <span class="error-msg">{{ errors.clienteId }}</span> }
+    </div>
+    <div class="form-group">
+      <button class="btn-consultar" (click)="buscar()" [disabled]="loading()">
+        {{ loading() ? 'Consultando...' : 'Consultar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+@if (buscado()) {
+  @if (reporte().length === 0) {
+    <p style="color:#666; padding:8px 0;">No se encontraron movimientos para el período seleccionado.</p>
+  } @else {
+    <div class="summary-row">
+      <div class="summary-card creditos">
+        <div class="label">Total Créditos</div>
+        <div class="valor">$ {{ totalCreditos | number:'1.2-2' }}</div>
+      </div>
+      <div class="summary-card debitos">
+        <div class="label">Total Débitos</div>
+        <div class="valor">$ {{ totalDebitos | number:'1.2-2' }}</div>
+      </div>
+      <div class="summary-card total">
+        <div class="label">Movimientos</div>
+        <div class="valor">{{ reporte().length }}</div>
+      </div>
+    </div>
+
+    <div class="toolbar" style="margin-bottom:10px;">
+      <span style="font-size:13px; color:#666;">{{ reporte().length }} registro(s)</span>
+      <button class="btn-nuevo" (click)="descargarPdf()">Descargar PDF</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Nro Cuenta</th>
+            <th>Tipo</th>
+            <th>Saldo Inicial</th>
+            <th>Estado</th>
+            <th>Movimiento</th>
+            <th>Saldo Disponible</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of reporte(); track $index) {
+            <tr>
+              <td>{{ r.Fecha }}</td>
+              <td>{{ r.Cliente }}</td>
+              <td>{{ r['Numero Cuenta'] }}</td>
+              <td>{{ r.Tipo }}</td>
+              <td class="monto">$ {{ r['Saldo Inicial'] | number:'1.2-2' }}</td>
+              <td>
+                <span [class]="r.Estado ? 'estado-activo' : 'estado-inactivo'">
+                  {{ r.Estado ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="monto" [class.negativo]="r.Movimiento < 0" [class.positivo]="r.Movimiento > 0">
+                {{ r.Movimiento | number:'1.2-2' }}
+              </td>
+              <td class="monto">$ {{ r['Saldo Disponible'] | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}
+
+@if (toast()) {
+  <div class="toast" [class.success]="toast()!.tipo === 'success'" [class.error]="toast()!.tipo === 'error'">
+    {{ toast()!.msg }}
+  </div>
+}

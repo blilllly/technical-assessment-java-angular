@@ -1,0 +1,116 @@
+<div class="page-title">Cuentas</div>
+
+<div class="toolbar">
+  <input
+    class="search-input"
+    type="text"
+    placeholder="Buscar"
+    [value]="busqueda()"
+    (input)="onBusqueda($event)"
+  />
+  <button class="btn-nuevo" (click)="abrirNuevo()">Nuevo</button>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Nro Cuenta</th>
+        <th>Tipo</th>
+        <th>Saldo Inicial</th>
+        <th>Estado</th>
+        <th>Cliente</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (loading()) {
+        <tr class="empty-row"><td colspan="6">Cargando...</td></tr>
+      } @else if (filtradas().length === 0) {
+        <tr class="empty-row"><td colspan="6">No se encontraron cuentas.</td></tr>
+      } @else {
+        @for (c of filtradas(); track c.id) {
+          <tr>
+            <td>{{ c.numeroCuenta }}</td>
+            <td>{{ c.tipoCuenta }}</td>
+            <td class="monto">$ {{ c.saldoInicial | number:'1.2-2' }}</td>
+            <td>
+              <span [class]="c.estado ? 'estado-activo' : 'estado-inactivo'">
+                {{ c.estado ? 'Activa' : 'Inactiva' }}
+              </span>
+            </td>
+            <td>{{ c.clienteNombre }}</td>
+            <td>
+              <button class="btn-edit" (click)="abrirEditar(c)">Editar</button>
+              <button class="btn-delete" (click)="eliminar(c)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (showModal()) {
+  <div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editando() ? 'Editar Cuenta' : 'Nueva Cuenta' }}</h3>
+        <button class="modal-close" (click)="showModal.set(false)">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Número de Cuenta *</label>
+        <input type="text" [(ngModel)]="form.numeroCuenta" [class.error]="errors.numeroCuenta" placeholder="Ej: 478758" />
+        @if (errors.numeroCuenta) { <span class="error-msg">{{ errors.numeroCuenta }}</span> }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de Cuenta *</label>
+          <select [(ngModel)]="form.tipoCuenta" [class.error]="errors.tipoCuenta">
+            <option value="">Seleccionar</option>
+            @for (t of tiposCuenta; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+          @if (errors.tipoCuenta) { <span class="error-msg">{{ errors.tipoCuenta }}</span> }
+        </div>
+        <div class="form-group">
+          <label>Saldo Inicial *</label>
+          <input type="number" [(ngModel)]="form.saldoInicial" [class.error]="errors.saldoInicial" min="0" step="0.01" />
+          @if (errors.saldoInicial) { <span class="error-msg">{{ errors.saldoInicial }}</span> }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Cliente *</label>
+        <select [(ngModel)]="form.clienteId" [class.error]="errors.clienteId">
+          <option [value]="0">Seleccionar cliente</option>
+          @for (cl of clientes(); track cl.clienteId) {
+            <option [value]="cl.clienteId">{{ cl.nombre }}</option>
+          }
+        </select>
+        @if (errors.clienteId) { <span class="error-msg">{{ errors.clienteId }}</span> }
+      </div>
+
+      <div class="form-group">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="form.estado" />
+          {{ form.estado ? 'Activa' : 'Inactiva' }}
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showModal.set(false)">Cancelar</button>
+        <button class="btn-save" (click)="guardar()">{{ editando() ? 'Actualizar' : 'Guardar' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast()) {
+  <div class="toast" [class.success]="toast()!.tipo === 'success'" [class.error]="toast()!.tipo === 'error'">
+    {{ toast()!.msg }}
+  </div>
+}

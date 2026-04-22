@@ -1,0 +1,127 @@
+<div class="page-title">Clientes</div>
+
+<div class="toolbar">
+  <input
+    class="search-input"
+    type="text"
+    placeholder="Buscar"
+    [value]="busqueda()"
+    (input)="onBusqueda($event)"
+  />
+  <button class="btn-nuevo" (click)="abrirNuevo()">Nuevo</button>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nombre</th>
+        <th>Identificación</th>
+        <th>Teléfono</th>
+        <th>Dirección</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @if (loading()) {
+        <tr class="empty-row"><td colspan="7">Cargando...</td></tr>
+      } @else if (filtrados().length === 0) {
+        <tr class="empty-row"><td colspan="7">No se encontraron clientes.</td></tr>
+      } @else {
+        @for (c of filtrados(); track c.clienteId) {
+          <tr>
+            <td>{{ c.clienteId }}</td>
+            <td>{{ c.nombre }}</td>
+            <td>{{ c.identificacion }}</td>
+            <td>{{ c.telefono ?? '-' }}</td>
+            <td>{{ c.direccion ?? '-' }}</td>
+            <td>
+              <span [class]="c.estado ? 'estado-activo' : 'estado-inactivo'">
+                {{ c.estado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-edit" (click)="abrirEditar(c)">Editar</button>
+              <button class="btn-delete" (click)="eliminar(c)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+</div>
+
+@if (showModal()) {
+  <div class="modal-overlay" (click)="showModal.set(false)">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editando() ? 'Editar Cliente' : 'Nuevo Cliente' }}</h3>
+        <button class="modal-close" (click)="showModal.set(false)">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" [(ngModel)]="form.nombre" [class.error]="errors.nombre" placeholder="Nombre completo" />
+        @if (errors.nombre) { <span class="error-msg">{{ errors.nombre }}</span> }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Género</label>
+          <select [(ngModel)]="form.genero">
+            <option value="">Seleccionar</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Edad</label>
+          <input type="number" [(ngModel)]="form.edad" min="1" placeholder="Edad" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Identificación *</label>
+        <input type="text" [(ngModel)]="form.identificacion" [class.error]="errors.identificacion" placeholder="Cédula o RUC" />
+        @if (errors.identificacion) { <span class="error-msg">{{ errors.identificacion }}</span> }
+      </div>
+
+      <div class="form-group">
+        <label>Dirección</label>
+        <input type="text" [(ngModel)]="form.direccion" placeholder="Dirección" />
+      </div>
+
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="text" [(ngModel)]="form.telefono" placeholder="Teléfono" />
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña {{ editando() ? '(dejar en blanco para no cambiar)' : '*' }}</label>
+        <input type="password" [(ngModel)]="form.contrasena" [class.error]="errors.contrasena" placeholder="Contraseña" />
+        @if (errors.contrasena) { <span class="error-msg">{{ errors.contrasena }}</span> }
+      </div>
+
+      <div class="form-group">
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="form.estado" />
+          {{ form.estado ? 'Activo' : 'Inactivo' }}
+        </label>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="showModal.set(false)">Cancelar</button>
+        <button class="btn-save" (click)="guardar()">{{ editando() ? 'Actualizar' : 'Guardar' }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (toast()) {
+  <div class="toast" [class.success]="toast()!.tipo === 'success'" [class.error]="toast()!.tipo === 'error'">
+    {{ toast()!.msg }}
+  </div>
+}
